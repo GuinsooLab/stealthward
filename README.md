@@ -4,7 +4,7 @@
     <small></small>
 </div>
 
-# stealthward
+# Stealthward
 
 `Data observability`
 
