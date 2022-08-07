@@ -1,0 +1,18 @@
+nav.side-nav {
+    margin: 0 auto .5rem;
+    height: 60px;
+    @apply w-full flex justify-center;
+}
+
+.side-nav ul {
+    @apply flex items-center w-full justify-around;
+    width: 75%;
+}
+
+.side-nav ul li {
+    @apply text-center cursor-pointer;
+}
+
+.side-nav ul li.active {
+    @apply pb-1;
+}

@@ -1,0 +1,66 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.accordion {
+	width: 100%;
+	overflow: hidden;	
+}
+.accordion-header {
+  position: relative;
+}
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  will-change: max-height;
+  transition: all 0.25s ease-out;
+  opacity: 0;
+}
+.accordion-content.active {
+  opacity: 1;
+  max-height: 100%;
+  display: block;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+.settings-sidebar .active {
+  @apply font-bold;
+  /* border-bottom: 3px solid rgba(57,35,150); */
+  border-bottom: 3px solid rgba(57,35,150, var(--tw-bg-opacity));
+  
+}

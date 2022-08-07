@@ -1,0 +1,24 @@
+name: '{{project_name}}'
+version: '1.0.0'
+config-version: 2
+
+# Setup profile for ward in your ~/.dbt/profile.yml file
+profile: '{{project_name}}'
+
+# These configurations specify where dbt should look for different types of files.
+# The `source-paths` config, for example, states that models in this project can be
+# found in the "models/" directory. You probably won't need to change these!
+model-paths: ["models"]
+analysis-paths: ["analysis"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"  # directory which will store compiled SQL files
+clean-targets: ["target", "dbt_modules", "dbt_packages"]
+
+vars:
+  re_data:anomaly_detector:
+    name: modified_z_score
+    threshold: 3

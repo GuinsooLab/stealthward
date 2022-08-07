@@ -1,0 +1,148 @@
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#sidebar {
+    --tw-translate-x: -100%;
+}
+
+.navlink {
+    @apply flex items-center space-x-2 mb-2 py-2 px-4 transition duration-200 hover:bg-gray-600 hover:text-white
+}
+
+.app-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.navlink.active {
+    @apply bg-primary;
+}
+
+.navlink.active.disabled {
+    pointer-events: none;
+    color: currentColor;
+    cursor: not-allowed;
+}
+
+.details-cell {
+    color: #1d39c4;
+    background: #f0f5ff;
+    border-color: #adc6ff;
+}
+
+.pass {
+    color: #FFF;
+    background: hsl(150deg 66% 44%);
+    width: 60px;
+}
+
+.fail,
+.error {
+    @apply bg-red-600 text-white;
+    width: 60px;
+}
+
+select {
+    margin: 0 1px;
+}
+
+#menu-close-icon {
+    display: none;
+}
+
+#menu-open:checked ~ #sidebar {
+    --tw-translate-x: 0;
+}
+
+#menu-open:checked ~ * #mobile-menu-button {
+    background-color: rgba(31, 41, 55, var(--tw-bg-opacity));
+}
+
+#menu-open:checked ~ * #menu-open-icon {
+    display: none;
+}
+
+#menu-open:checked ~ * #menu-close-icon {
+    display: block;
+}
+
+@media (min-width: 768px) {
+    #sidebar {
+        --tw-translate-x: 0;
+    }
+}
+
+.active-tab {
+    border-bottom: 3px solid rgba(57,35,150, var(--tw-bg-opacity));
+}
+
+.sticky-nav {
+    @apply sticky bg-gray-100 py-1 pl-2 flex;
+    height: 60px;
+    top: -1.5rem;
+    z-index: 30;
+}
+
+.css-26l3qy-menu {
+    z-index: 100 !important;
+}
+
+.right-component {
+    height: 32px;
+}
+
+.bg-source {
+    background: hsl(97deg 66% 44%);
+}
+
+.bg-seed {
+    background: hsl(150deg 66% 44%);
+}
+
+.bg-model {
+    background: hsl(190deg 100% 35%);
+}
+
+.rounded-tooltip {
+    border-radius: 0.2rem;
+}
+
+.graph-view {
+    min-height: 30rem;
+}
+
+.w-80 {
+    width: 80px;
+    max-width: 80px;
+}
+
+.w-400 {
+    width: 400px;
+    max-width: 450px;
+}
+
+.copy-icon {
+    outline: none;
+    transition: 0.2s all;
+}
+
+.copy-icon:active {
+    transform: scale(0.8);
+    box-shadow: 3px 2px 22px 1px rgba(0, 0, 0, 0.24);
+}

@@ -1,0 +1,33 @@
+version: 2
+
+seeds:
+  - name: companies
+    config:
+      re_data_monitored: true
+      re_data_time_filter: null
+      re_data_columns:
+        - brand_name
+        - show
+        - year
+
+  - name: orders
+    tests:
+      - re_data.assert_in_range:
+          metric: row_count
+          min_value: 450
+          max_value: 550
+
+    config:
+      re_data_columns:
+        - amount
+        - status
+      re_data_anomaly_detector:
+        name: boxplot
+        whisker_boundary_multiplier: 2.0
+      re_data_owners:
+        - backend
+
+    columns:
+      - name: status
+        tests:
+          - not_null
