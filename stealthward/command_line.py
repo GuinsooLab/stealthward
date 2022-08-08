@@ -1,4 +1,3 @@
-from email.policy import default
 import click
 import subprocess
 import json
@@ -7,23 +6,23 @@ import shutil
 import logging
 
 import os
-from re_data.templating import render
-from re_data.include import OVERVIEW_INDEX_FILE_PATH
+from stealthward.templating import render
+from stealthward.include import OVERVIEW_INDEX_FILE_PATH
 from http.server import SimpleHTTPRequestHandler
 import webbrowser
 from socketserver import TCPServer
-from re_data.version import check_version, with_version_check
+from stealthward.version import with_version_check
 from yachalk import chalk
 import yaml
-from re_data.notifications.slack import slack_notify
-from re_data.utils import build_mime_message, parse_dbt_vars, prepare_exported_alerts_per_model, \
-    generate_slack_message, build_notification_identifiers_per_model, send_mime_email, load_metadata_from_project, normalize_re_data_json_export, \
-        ALERT_TYPES, validate_alert_types, get_project_root
-
+from stealthward.notifications.slack import slack_notify
+from stealthward.utils import build_mime_message, parse_dbt_vars, prepare_exported_alerts_per_model, \
+    generate_slack_message, build_notification_identifiers_per_model, send_mime_email, load_metadata_from_project, \
+    normalize_re_data_json_export, \
+    ALERT_TYPES, validate_alert_types, get_project_root
 from dbt.config.project import Project
-from re_data.tracking import anonymous_tracking
-from re_data.config.utils import read_re_data_config
-from re_data.config.validate import validate_config_section
+from stealthward.tracking import anonymous_tracking
+from stealthward.config.utils import read_re_data_config
+from stealthward.config.validate import validate_config_section
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +32,9 @@ def add_options(options):
         for option in reversed(options):
             func = option(func)
         return func
+
     return _add_options
+
 
 def add_dbt_flags(command_list, flags):
     for key, value in flags.items():
@@ -43,6 +44,7 @@ def add_dbt_flags(command_list, flags):
             command_list.extend([f'--{key}', value])
     print(' '.join(command_list))
 
+
 def get_target_paths(kwargs, re_data_target_dir=None):
     project_root = get_project_root(kwargs)
     partial = Project.partial_load(project_root)
@@ -51,7 +53,7 @@ def get_target_paths(kwargs, re_data_target_dir=None):
     if re_data_target_dir:
         re_data_target_path = os.path.abspath(re_data_target_dir)
     else:
-        re_data_target_path = os.path.join(dbt_target_path, 'ward')
+        re_data_target_path = os.path.join(dbt_target_path, 'stealthward')
 
     return dbt_target_path, re_data_target_path
 
@@ -105,7 +107,8 @@ dbt_flags = [
     dbt_vars_option
 ]
 
-@click.group(help=f"ward CLI")
+
+@click.group(help=f"stealthward CLI")
 def main():
     pass
 
@@ -118,12 +121,14 @@ def main():
 def init(project_name):
     print(f"Creating {project_name} template project")
     dir_path = os.path.dirname(os.path.realpath(__file__))
+    print(f"Project dir path: {dir_path}")
     shutil.copytree(os.path.join(dir_path, 'dbt_template'), project_name)
 
     with open(f"{project_name}/dbt_project.yml", "w") as f:
         f.write(render.render_dbt_project(project_name))
 
     bash_command = f'cd {project_name} && dbt deps'
+    print("Check dbt deps")
     response = os.system(bash_command)
 
     if not response:
@@ -134,7 +139,7 @@ def init(project_name):
     print(f"Creating {project_name} template project", info)
 
     if not response:
-        print(f"Setup profile & ward:schemas var in dbt_project.yml", "INFO")
+        print(f"Setup profile & stealthward:schemas var in dbt_project.yml", "INFO")
 
 
 @main.command()
@@ -158,14 +163,14 @@ def detect(**kwargs):
     '--start-date',
     type=click.DateTime(formats=["%Y-%m-%d"]),
     default=str(date.today() - timedelta(days=1)),
-    help="Specify starting date to compute monitoring data, by default ward will use yesterday for that value"
+    help="Specify starting date to compute monitoring data, by default stealthward will use yesterday for that value"
 )
 @click.option(
     '--end-date',
     type=click.DateTime(formats=["%Y-%m-%d"]),
     default=str(date.today()),
     help="""
-        Specify end date to compute monitoring data, by default ward will use today for that.
+        Specify end date to compute monitoring data, by default stealthward will use today for that.
         And compute stats for last full data for that
     """
 )
@@ -180,7 +185,7 @@ def detect(**kwargs):
 @click.option(
     '--full-refresh',
     is_flag=True,
-    help='Warning! If specified ward runs first dbt run with --full-refresh option cleaning all previously gathered profiling information'
+    help='Warning! If specified stealthward runs first dbt run with --full-refresh option cleaning all previously gathered profiling information'
 )
 @add_options(dbt_flags)
 @anonymous_tracking
@@ -205,15 +210,15 @@ def run(start_date, end_date, interval, full_refresh, **kwargs):
         print(f"Running for time interval: {start_str} - {end_str}", "RUN")
 
         re_data_dbt_vars = {
-            'ward:time_window_start': str(for_date),
-            'ward:time_window_end': str(for_date + delta)
+            'stealthward:time_window_start': str(for_date),
+            'stealthward:time_window_end': str(for_date + delta)
         }
         dbt_vars.update(re_data_dbt_vars)
 
-        run_list = ['dbt'] + ['run'] + ['--models'] + ['package:ward'] + ['--vars'] + [json.dumps(dbt_vars)]
+        run_list = ['dbt'] + ['run'] + ['--models'] + ['package:stealthward'] + ['--vars'] + [json.dumps(dbt_vars)]
         if for_date == start_date and full_refresh:
             run_list.append('--full-refresh')
-        
+
         add_dbt_flags(run_list, kwargs)
 
         completed_process = subprocess.run(run_list)
@@ -227,7 +232,7 @@ def run(start_date, end_date, interval, full_refresh, **kwargs):
         )
 
 
-@click.group(help=f"Generate overview page for your ward project")
+@click.group(help=f"Generate overview page for your stealthward project")
 def overview():
     pass
 
@@ -242,14 +247,14 @@ def notify():
     '--start-date',
     type=click.DateTime(formats=["%Y-%m-%d"]),
     default=str((date.today() - timedelta(days=7)).strftime("%Y-%m-%d")),
-    help="Specify starting date to generate overview data, by default ward will use 7 days ago for that value"
+    help="Specify starting date to generate overview data, by default stealthward will use 7 days ago for that value"
 )
 @click.option(
     '--end-date',
     type=click.DateTime(formats=["%Y-%m-%d"]),
     default=str(date.today().strftime("%Y-%m-%d")),
     help="""
-        Specify end date to compute monitoring data, by default ward will use today for that.
+        Specify end date to compute monitoring data, by default stealthward will use today for that.
         And compute stats for last full data for that
     """
 )
@@ -266,7 +271,7 @@ def notify():
     '--stealthward-target-dir',
     type=click.STRING,
     help="""
-        Which directory to store artefacts generated by ward
+        Which directory to store artefacts generated by stealthward
         Defaults to the 'target-path' used in dbt_project.yml
     """
 )
@@ -311,7 +316,8 @@ def generate(start_date, end_date, interval, re_data_target_dir, force, **kwargs
         'end_date': end_date,
         'tests_history_path': tests_history_path
     }
-    tests_history_command_list = ['dbt', 'run-operation', 'export_tests_history', '--args', yaml.dump(tests_history_args)]
+    tests_history_command_list = ['dbt', 'run-operation', 'export_tests_history', '--args',
+                                  yaml.dump(tests_history_args)]
     if dbt_vars: tests_history_command_list.extend(['--vars', yaml.dump(dbt_vars)])
     add_dbt_flags(tests_history_command_list, kwargs)
     th_completed_process = subprocess.run(tests_history_command_list)
@@ -323,13 +329,14 @@ def generate(start_date, end_date, interval, re_data_target_dir, force, **kwargs
         'end_date': end_date,
         'table_samples_path': table_samples_path
     }
-    table_samples_command_list = ['dbt', 'run-operation', 'export_table_samples', '--args', yaml.dump(table_samples_args)]
+    table_samples_command_list = ['dbt', 'run-operation', 'export_table_samples', '--args',
+                                  yaml.dump(table_samples_args)]
     if dbt_vars: table_samples_command_list.extend(['--vars', yaml.dump(dbt_vars)])
     add_dbt_flags(table_samples_command_list, kwargs)
     ts_completed_process = subprocess.run(table_samples_command_list)
     ts_completed_process.check_returncode()
 
-    # write metadata to ward target path
+    # write metadata to stealthward target path
     with open(metadata_path, 'w+', encoding='utf-8') as f:
         json.dump(metadata, f)
 
@@ -367,7 +374,7 @@ def generate(start_date, end_date, interval, re_data_target_dir, force, **kwargs
     '--stealthward-target-dir',
     type=click.STRING,
     help="""
-        Which directory to store artefacts generated by ward
+        Which directory to store artefacts generated by stealthward
         Defaults to the 'target-path' used in dbt_project.yml
     """
 )
@@ -404,14 +411,14 @@ def serve(port, re_data_target_dir, no_browser, **kwargs):
     '--start-date',
     type=click.DateTime(formats=["%Y-%m-%d"]),
     default=str((date.today() - timedelta(days=7)).strftime("%Y-%m-%d")),
-    help="Specify starting date to generate alert data, by default ward will use 7 days ago for that value"
+    help="Specify starting date to generate alert data, by default stealthward will use 7 days ago for that value"
 )
 @click.option(
     '--end-date',
     type=click.DateTime(formats=["%Y-%m-%d"]),
     default=str(date.today().strftime("%Y-%m-%d")),
     help="""
-        Specify end date used in generating alert data, by default ward will use current date for that.
+        Specify end date used in generating alert data, by default stealthward will use current date for that.
     """
 )
 @click.option(
@@ -431,7 +438,7 @@ def serve(port, re_data_target_dir, no_browser, **kwargs):
     '--stealthward-target-dir',
     type=click.STRING,
     help="""
-        Which directory to store artefacts generated by ward
+        Which directory to store artefacts generated by stealthward
         Defaults to the 'target-path' used in dbt_project.yml
     """
 )
@@ -452,7 +459,7 @@ def slack(start_date, end_date, webhook_url, subtitle, re_data_target_dir, selec
     end_date = str(end_date.date())
     selected_alert_types = set(select)
 
-    if not webhook_url: # if webhook_url is via arguments, check the config file
+    if not webhook_url:  # if webhook_url is via arguments, check the config file
         config = read_re_data_config()
         validate_config_section(config, 'slack')
         slack_config = config.get('notifications').get('slack')
@@ -462,7 +469,7 @@ def slack(start_date, end_date, webhook_url, subtitle, re_data_target_dir, selec
     alerts_path = os.path.join(re_data_target_path, 'alerts.json')
     monitored_path = os.path.join(re_data_target_path, 'monitored.json')
     dbt_vars = parse_dbt_vars(kwargs.get('dbt_vars'))
-    
+
     args = {
         'start_date': start_date,
         'end_date': end_date,
@@ -486,7 +493,8 @@ def slack(start_date, end_date, webhook_url, subtitle, re_data_target_dir, selec
 
     slack_members = build_notification_identifiers_per_model(monitored_list=monitored, channel='slack')
 
-    alerts_per_model = prepare_exported_alerts_per_model(alerts=alerts, members_per_model=slack_members, selected_alert_types=selected_alert_types)
+    alerts_per_model = prepare_exported_alerts_per_model(alerts=alerts, members_per_model=slack_members,
+                                                         selected_alert_types=selected_alert_types)
     for model, details in alerts_per_model.items():
         owners = slack_members.get(model, [])
         slack_message = generate_slack_message(model, details, owners, subtitle, selected_alert_types)
@@ -495,26 +503,27 @@ def slack(start_date, end_date, webhook_url, subtitle, re_data_target_dir, selec
         f"Notification sent", chalk.green("SUCCESS")
     )
 
+
 @notify.command()
 @click.option(
     '--start-date',
     type=click.DateTime(formats=["%Y-%m-%d"]),
     default=str((date.today() - timedelta(days=7)).strftime("%Y-%m-%d")),
-    help="Specify starting date to generate alert data, by default ward will use 7 days ago for that value"
+    help="Specify starting date to generate alert data, by default stealthward will use 7 days ago for that value"
 )
 @click.option(
     '--end-date',
     type=click.DateTime(formats=["%Y-%m-%d"]),
     default=str(date.today().strftime("%Y-%m-%d")),
     help="""
-        Specify end date used in generating alert data, by default ward will use current date for that.
+        Specify end date used in generating alert data, by default stealthward will use current date for that.
     """
 )
 @click.option(
     '--stealthward-target-dir',
     type=click.STRING,
     help="""
-        Which directory to store artefacts generated by ward
+        Which directory to store artefacts generated by stealthward
         Defaults to the 'target-path' used in dbt_project.yml
     """
 )
@@ -549,14 +558,13 @@ def email(start_date, end_date, re_data_target_dir, select, **kwargs):
     alerts_path = os.path.join(re_data_target_path, 'alerts.json')
     monitored_path = os.path.join(re_data_target_path, 'monitored.json')
     dbt_vars = parse_dbt_vars(kwargs.get('dbt_vars'))
-    
+
     args = {
         'start_date': start_date,
         'end_date': end_date,
         'alerts_path': alerts_path,
         'monitored_path': monitored_path,
     }
-    
 
     command_list = ['dbt', 'run-operation', 'export_alerts', '--args', yaml.dump(args)]
     if dbt_vars: command_list.extend(['--vars', yaml.dump(dbt_vars)])
@@ -570,7 +578,8 @@ def email(start_date, end_date, re_data_target_dir, select, **kwargs):
         monitored = json.load(f)
 
     email_members = build_notification_identifiers_per_model(monitored_list=monitored, channel='email')
-    alerts_per_model = prepare_exported_alerts_per_model(alerts=alerts, members_per_model=email_members, selected_alert_types=selected_alert_types)
+    alerts_per_model = prepare_exported_alerts_per_model(alerts=alerts, members_per_model=email_members,
+                                                         selected_alert_types=selected_alert_types)
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     for model in alerts_per_model:
         owners = email_members.get(model, [])
@@ -592,7 +601,7 @@ def email(start_date, end_date, re_data_target_dir, select, **kwargs):
                 smtp_password=smtp_password,
                 use_ssl=use_ssl,
             )
-    
+
     print(
         f"Notification sent", chalk.green("SUCCESS")
     )

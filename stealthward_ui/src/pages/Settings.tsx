@@ -144,7 +144,7 @@ const Settings: FC = (): ReactElement => {
     if (metaData) {
       let index = 0;
       for (const [key, value] of Object.entries(metaData.project_dict?.vars)) {
-        if (!key.includes('ward')) continue;
+        if (!key.includes('stealthward')) continue;
 
         result.push(
           <div

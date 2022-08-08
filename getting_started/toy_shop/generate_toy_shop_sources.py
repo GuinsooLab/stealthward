@@ -19,6 +19,3 @@ def generate_customers_sql_values(file_name):
 
 if __name__ == '__main__':
     generate_customers_sql_values('customers.csv')
-
-
-        

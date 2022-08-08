@@ -3,9 +3,9 @@ import {
   BiCog,
   BiCodeCurly,
   BiNetworkChart,
-  ImNotification,
+  BiNotification,
   BiBook,
-  SiSpeedtest,
+  BiTestTube,
   VscTable,
 } from 'react-icons/all';
 import { NavLink } from 'react-router-dom';
@@ -39,7 +39,7 @@ const Sidebar: React.FC = (): ReactElement => (
           to="alerts"
           className={({ isActive }) => (isActive ? 'navlink active app-nav' : 'navlink app-nav')}
         >
-          <ImNotification size="1.25em" />
+          <BiNotification size="1.25em" />
         </NavLink>
 
         <NavLink
@@ -53,7 +53,7 @@ const Sidebar: React.FC = (): ReactElement => (
           to="tests"
           className={({ isActive }) => (isActive ? 'navlink active app-nav' : 'navlink app-nav')}
         >
-          <SiSpeedtest size="1.25em" />
+          <BiTestTube size="1.25em" />
         </NavLink>
 
         <NavLink

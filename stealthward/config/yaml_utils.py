@@ -11,6 +11,7 @@ except ImportError:
         Loader, SafeLoader, Dumper
     )
 
+
 def load_yaml_from_text(contents):
     try:
         return yaml.load(contents, Loader=SafeLoader)

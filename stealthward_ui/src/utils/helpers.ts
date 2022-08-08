@@ -3,7 +3,7 @@ import {
   Anomaly, DbtNode, DbtSource, Metric, SchemaChange,
 } from '../contexts/redataOverviewContext';
 
-export const RE_DATA_OVERVIEW_FILE = 'overview.json';
+export const WARD_OVERVIEW_FILE = 'overview.json';
 export const DBT_MANIFEST_FILE = 'dbt_manifest.json';
 export const TABLE_SAMPLE_FILE = 'table_samples.json';
 export const TEST_FILE = 'tests_history.json';
@@ -125,4 +125,4 @@ export const generateModelId = (details: DbtNode | DbtSource): string => {
 
 export const copyToClipboard = (text?: string): Promise<void> => navigator.clipboard.writeText(text || '');
 
-export const PROJECT_NAME = 'ward';
+export const PROJECT_NAME = 'stealthward';
