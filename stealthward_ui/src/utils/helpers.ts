@@ -125,4 +125,4 @@ export const generateModelId = (details: DbtNode | DbtSource): string => {
 
 export const copyToClipboard = (text?: string): Promise<void> => navigator.clipboard.writeText(text || '');
 
-export const PROJECT_NAME = 'ward';
+export const PROJECT_NAME = 'stealthward';

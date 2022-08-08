@@ -2,7 +2,7 @@ name: '{{project_name}}'
 version: '1.0.0'
 config-version: 2
 
-# Setup profile for ward in your ~/.dbt/profile.yml file
+# Setup profile for stealthward in your ~/.dbt/profile.yml file
 profile: '{{project_name}}'
 
 # These configurations specify where dbt should look for different types of files.

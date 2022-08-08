@@ -16,7 +16,7 @@ def get_property(prop, project):
 
 setup(
     name="stealthward",
-    version=get_property('__version__', 'ward'),
+    version=get_property('__version__', 'stealthward'),
     author="ciusji",
     author_email="bqjimaster@gmail.com",
     description="Stealthward - data quality framework | powered by GuinsooLab",
@@ -40,7 +40,7 @@ setup(
     ],
     extras_require={"dev": ["isort", "black", "pre-commit"]},
     entry_points={
-        "console_scripts": ["ward=ward.command_line:main"],
+        "console_scripts": ["stealthward=stealthward.command_line:main"],
     },
     packages=find_packages(exclude=("tests",))
 )

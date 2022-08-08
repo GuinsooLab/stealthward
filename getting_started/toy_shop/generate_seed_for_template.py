@@ -42,7 +42,7 @@ def generate_random_orders():
         })
 
     keys = data[0].keys()
-    with open('../../ward/dbt_template/seeds/orders.csv', 'w', newline='') as output_file:
+    with open('../../stealthward/dbt_template/seeds/orders.csv', 'w', newline='') as output_file:
         dict_writer = csv.DictWriter(output_file, keys)
         dict_writer.writeheader()
         dict_writer.writerows(data)
@@ -57,7 +57,7 @@ def generate_random_customers():
             'name': names[i-1],
         })
     keys = data[0].keys()
-    with open('../../ward/dbt_template/seeds/customers.csv', 'w', newline='') as output_file:
+    with open('../../stealthward/dbt_template/seeds/customers.csv', 'w', newline='') as output_file:
         dict_writer = csv.DictWriter(output_file, keys)
         dict_writer.writeheader()
         dict_writer.writerows(data)

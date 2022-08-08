@@ -281,7 +281,7 @@ def send_mime_email(
 def load_metadata_from_project(start_date, end_date, interval, kwargs) -> Dict:
     project_root = os.getcwd() if not kwargs.get('project_dir') else os.path.abspath(kwargs['project_dir'])
     partial = Project.partial_load(project_root)
-    version = pkg_resources.require("ward")[0].version
+    version = pkg_resources.require("stealthward")[0].version
     metadata = {
         'project_dict': partial.project_dict,
         'packages': partial.packages_dict,

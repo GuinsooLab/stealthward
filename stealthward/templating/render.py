@@ -1,7 +1,7 @@
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 env = Environment(
-    loader=PackageLoader("ward"),
+    loader=PackageLoader("stealthward"),
     autoescape=select_autoescape()
 )
 

@@ -1,7 +1,7 @@
 import analytics
 import os
 import uuid
-from ward import flags
+from stealthward import flags
 import yaml
 from yaml import SafeLoader
 from functools import wraps

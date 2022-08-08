@@ -1,4 +1,4 @@
-import ward
+import stealthward
 from yachalk import chalk
 import yaml
 from yaml import SafeLoader
@@ -8,7 +8,7 @@ import os
 
 def get_re_data_dbt_version(project_root):
     try:
-        path = os.path.join(project_root, 'dbt_packages', 'ward', 'dbt_project.yml')
+        path = os.path.join(project_root, 'dbt_packages', 'stealthward', 'dbt_project.yml')
 
         with open(path, "r") as fh:
             project_path = yaml.load(fh, Loader=SafeLoader)
@@ -16,7 +16,7 @@ def get_re_data_dbt_version(project_root):
 
     except Exception as e:
         print(chalk.yellow(
-            ("You don't seem to have ward dbt package installed.\n"
+            ("You don't seem to have stealthward dbt package installed.\n"
              "Please install it by adding to newest version from dbthub: https://hub.getdbt.com/re-data/re_data/latest\n\n")
         ))
 
@@ -24,7 +24,7 @@ def get_re_data_dbt_version(project_root):
 
 
 def check_version(project_root):
-    pypi_version = ward.__version__
+    pypi_version = stealthward.__version__
     dbt_version = get_re_data_dbt_version(project_root)
 
     if pypi_version != dbt_version:
@@ -38,7 +38,7 @@ def check_version(project_root):
 def with_version_check(fun):
     @wraps(fun)
     def decorated(*args, **kwargs):
-        project_root = ward.utils.get_project_root(kwargs)
+        project_root = stealthward.utils.get_project_root(kwargs)
         check_version(project_root)
         return fun(*args, **kwargs)
 
