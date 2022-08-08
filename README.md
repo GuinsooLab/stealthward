@@ -7,3 +7,11 @@
 # Stealthward
 
 `Data observability`
+
+## Overview 
+
+![overview](/stealthward_ui/src/overview.png)
+
+## License
+
+[MIT License](./LICENSE)

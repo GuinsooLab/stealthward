@@ -121,12 +121,14 @@ def main():
 def init(project_name):
     print(f"Creating {project_name} template project")
     dir_path = os.path.dirname(os.path.realpath(__file__))
+    print(f"Project dir path: {dir_path}")
     shutil.copytree(os.path.join(dir_path, 'dbt_template'), project_name)
 
     with open(f"{project_name}/dbt_project.yml", "w") as f:
         f.write(render.render_dbt_project(project_name))
 
     bash_command = f'cd {project_name} && dbt deps'
+    print("Check dbt deps")
     response = os.system(bash_command)
 
     if not response:
