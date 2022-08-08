@@ -1,8 +1,9 @@
 import os
 from typing import Dict, Any
-from re_data.config.system import load_file_contents_as_string
-from re_data.config.yaml_utils import load_yaml_from_text
-from re_data.flags import RE_DATA_CONFIG_DIR
+from ward.config.system import load_file_contents_as_string
+from ward.config.yaml_utils import load_yaml_from_text
+from ward.flags import RE_DATA_CONFIG_DIR
+
 
 def read_re_data_config() -> Dict[str, Any]:
     """

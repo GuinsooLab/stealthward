@@ -9,13 +9,12 @@ from dbt.config.project import Project
 import pkg_resources
 from click import BadOptionUsage
 
-
 try:
     from yaml import (
         CSafeLoader as SafeLoader
     )
 except ImportError:
-    from yaml import ( 
+    from yaml import (
         SafeLoader
     )
 from email.mime.multipart import MIMEMultipart
@@ -24,8 +23,10 @@ import smtplib
 
 ALERT_TYPES = {'anomaly', 'schema_change', 'test'}
 
+
 def get_project_root(kwargs):
     return os.getcwd() if not kwargs.get('project_dir') else os.path.abspath(kwargs['project_dir'])
+
 
 def format_alerts_to_table(alerts: list, limit=None) -> str:
     """
@@ -43,12 +44,14 @@ def format_alerts_to_table(alerts: list, limit=None) -> str:
             alert['value'],
             alert['time_window_end'],
         ])
-    if limit: 
+    if limit:
         table = table[:limit]
     return tabulate(table, headers=['Message', 'Value', 'Time Window'], tablefmt='orgtbl')
 
+
 def safe_load(content) -> Optional[Dict[str, Any]]:
     return yaml.load(content, Loader=SafeLoader)
+
 
 def parse_dbt_vars(dbt_vars_string) -> Dict[str, Any]:
     dbt_vars = {}
@@ -56,11 +59,13 @@ def parse_dbt_vars(dbt_vars_string) -> Dict[str, Any]:
         dbt_vars = safe_load(dbt_vars_string)
         content_type = type(dbt_vars)
         if content_type is not dict:
-            raise ValueError('The --dbt-vars argument expected a yaml dictionary, but got {}'.format(content_type.__name__))
+            raise ValueError(
+                'The --dbt-vars argument expected a yaml dictionary, but got {}'.format(content_type.__name__))
     return dbt_vars
 
 
-def prepare_exported_alerts_per_model(alerts: list, members_per_model: Dict[str, Tuple[str, str]], selected_alert_types: set) -> dict:
+def prepare_exported_alerts_per_model(alerts: list, members_per_model: Dict[str, Tuple[str, str]],
+                                      selected_alert_types: set) -> dict:
     """
     Prepares alerts per model for slack message generation.
     """
@@ -81,6 +86,7 @@ def prepare_exported_alerts_per_model(alerts: list, members_per_model: Dict[str,
         elif alert['type'] == 'test' and alert['type'] in selected_alert_types:
             alerts_per_model[model]['tests'].append(alert)
     return alerts_per_model
+
 
 def build_notification_identifiers_per_model(monitored_list: list, channel) -> Dict[str, Tuple[str, str]]:
     """
@@ -107,7 +113,6 @@ def build_notification_identifiers_per_model(monitored_list: list, channel) -> D
     return obj
 
 
-
 def generate_slack_message(model, details, owners, subtitle: str, selected_alert_types: set) -> dict:
     """
     Generates a slack message for a given model.
@@ -124,7 +129,7 @@ def generate_slack_message(model, details, owners, subtitle: str, selected_alert
                     "type": "plain_text",
                     "text": "Model: {}".format(model),
                     "emoji": True
-			    }
+                }
             },
             {
                 "type": "divider"
@@ -187,35 +192,36 @@ def generate_slack_message(model, details, owners, subtitle: str, selected_alert
         })
     if subtitle:
         message_obj['blocks'].append({
-			"type": "section",
-			"text": {
+            "type": "section",
+            "text": {
                 "type": "mrkdwn",
                 "text": subtitle
             }
-		}
-    )
+        }
+        )
     message_obj['blocks'].append({
-			"type": "context",
-			"elements": [
-				{
-					"type": "plain_text",
-					"text": "Generated at {}. Generate observability UI for more details".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
-					"emoji": True
-				}
-			]
-		}
+        "type": "context",
+        "elements": [
+            {
+                "type": "plain_text",
+                "text": "Generated at {}. Generate observability UI for more details".format(
+                    datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                "emoji": True
+            }
+        ]
+    }
     )
 
     return message_obj
-    
-    
+
+
 def build_mime_message(
-    mail_from: str,
-    mail_to: str,
-    subject: str,
-    html_content: str,
-    mime_subtype: str = 'mixed',
-    mime_charset: str = 'utf-8'):
+        mail_from: str,
+        mail_to: str,
+        subject: str,
+        html_content: str,
+        mime_subtype: str = 'mixed',
+        mime_charset: str = 'utf-8'):
     """
     Build a MIME message that can be used to send an email and
     returns full list of recipients.
@@ -238,6 +244,7 @@ def build_mime_message(
 
     return mime_msg
 
+
 def send_mime_email(
         mime_msg: MIMEMultipart,
         mail_from: str,
@@ -247,7 +254,7 @@ def send_mime_email(
         smtp_user: str,
         smtp_password: str,
         use_ssl: bool = True
-    ):
+):
     """
     Send an email using the provided MIME message.
 
@@ -270,7 +277,7 @@ def send_mime_email(
     server.sendmail(mail_from, mail_to, mime_msg.as_string())
     server.quit()
 
-    
+
 def load_metadata_from_project(start_date, end_date, interval, kwargs) -> Dict:
     project_root = os.getcwd() if not kwargs.get('project_dir') else os.path.abspath(kwargs['project_dir'])
     partial = Project.partial_load(project_root)
@@ -288,19 +295,20 @@ def load_metadata_from_project(start_date, end_date, interval, kwargs) -> Dict:
     }
     return metadata
 
-  
+
 def normalize_re_data_json_export(path: str):
     """
     Normalize the data exported from Re.
     """
     with open(path, 'r') as f:
         json_data = json.load(f)
-    
+
     normalized_json_data = [{k.lower(): v for k, v in data.items()} for data in json_data]
 
     # overwrite the original file with the normalized data
     with open(path, 'w+', encoding='utf-8') as f:
         json.dump(normalized_json_data, f)
+
 
 def validate_alert_types(selected_alert_types: List[str]):
     for alert_type in selected_alert_types:

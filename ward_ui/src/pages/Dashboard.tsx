@@ -28,7 +28,7 @@ import {
   generateModelId,
   METADATA_FILE,
   PROJECT_NAME,
-  RE_DATA_OVERVIEW_FILE,
+  WARD_OVERVIEW_FILE,
   stripQuotes,
   MONITORED_FILE,
   supportedResTypes,
@@ -325,7 +325,7 @@ const Dashboard: React.FC = (): ReactElement => {
         monitoredRequest,
         tableSamplesRequest,
       ] = await Promise.all([
-        fetch(RE_DATA_OVERVIEW_FILE, { headers }),
+        fetch(WARD_OVERVIEW_FILE, { headers }),
         fetch(DBT_MANIFEST_FILE, { headers }),
         fetch(TEST_FILE, { headers }),
         fetch(METADATA_FILE, { headers }),

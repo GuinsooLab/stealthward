@@ -1,4 +1,3 @@
-from email.policy import default
 import click
 import subprocess
 import json
@@ -7,23 +6,23 @@ import shutil
 import logging
 
 import os
-from re_data.templating import render
-from re_data.include import OVERVIEW_INDEX_FILE_PATH
+from ward.templating import render
+from ward.include import OVERVIEW_INDEX_FILE_PATH
 from http.server import SimpleHTTPRequestHandler
 import webbrowser
 from socketserver import TCPServer
-from re_data.version import check_version, with_version_check
+from ward.version import with_version_check
 from yachalk import chalk
 import yaml
-from re_data.notifications.slack import slack_notify
-from re_data.utils import build_mime_message, parse_dbt_vars, prepare_exported_alerts_per_model, \
-    generate_slack_message, build_notification_identifiers_per_model, send_mime_email, load_metadata_from_project, normalize_re_data_json_export, \
-        ALERT_TYPES, validate_alert_types, get_project_root
-
+from ward.notifications.slack import slack_notify
+from ward.utils import build_mime_message, parse_dbt_vars, prepare_exported_alerts_per_model, \
+    generate_slack_message, build_notification_identifiers_per_model, send_mime_email, load_metadata_from_project, \
+    normalize_re_data_json_export, \
+    ALERT_TYPES, validate_alert_types, get_project_root
 from dbt.config.project import Project
-from re_data.tracking import anonymous_tracking
-from re_data.config.utils import read_re_data_config
-from re_data.config.validate import validate_config_section
+from ward.tracking import anonymous_tracking
+from ward.config.utils import read_re_data_config
+from ward.config.validate import validate_config_section
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +32,9 @@ def add_options(options):
         for option in reversed(options):
             func = option(func)
         return func
+
     return _add_options
+
 
 def add_dbt_flags(command_list, flags):
     for key, value in flags.items():
@@ -42,6 +43,7 @@ def add_dbt_flags(command_list, flags):
             key = key.replace('_', '-')
             command_list.extend([f'--{key}', value])
     print(' '.join(command_list))
+
 
 def get_target_paths(kwargs, re_data_target_dir=None):
     project_root = get_project_root(kwargs)
@@ -104,6 +106,7 @@ dbt_flags = [
     dbt_profiles_dir_option,
     dbt_vars_option
 ]
+
 
 @click.group(help=f"ward CLI")
 def main():
@@ -213,7 +216,7 @@ def run(start_date, end_date, interval, full_refresh, **kwargs):
         run_list = ['dbt'] + ['run'] + ['--models'] + ['package:ward'] + ['--vars'] + [json.dumps(dbt_vars)]
         if for_date == start_date and full_refresh:
             run_list.append('--full-refresh')
-        
+
         add_dbt_flags(run_list, kwargs)
 
         completed_process = subprocess.run(run_list)
@@ -311,7 +314,8 @@ def generate(start_date, end_date, interval, re_data_target_dir, force, **kwargs
         'end_date': end_date,
         'tests_history_path': tests_history_path
     }
-    tests_history_command_list = ['dbt', 'run-operation', 'export_tests_history', '--args', yaml.dump(tests_history_args)]
+    tests_history_command_list = ['dbt', 'run-operation', 'export_tests_history', '--args',
+                                  yaml.dump(tests_history_args)]
     if dbt_vars: tests_history_command_list.extend(['--vars', yaml.dump(dbt_vars)])
     add_dbt_flags(tests_history_command_list, kwargs)
     th_completed_process = subprocess.run(tests_history_command_list)
@@ -323,7 +327,8 @@ def generate(start_date, end_date, interval, re_data_target_dir, force, **kwargs
         'end_date': end_date,
         'table_samples_path': table_samples_path
     }
-    table_samples_command_list = ['dbt', 'run-operation', 'export_table_samples', '--args', yaml.dump(table_samples_args)]
+    table_samples_command_list = ['dbt', 'run-operation', 'export_table_samples', '--args',
+                                  yaml.dump(table_samples_args)]
     if dbt_vars: table_samples_command_list.extend(['--vars', yaml.dump(dbt_vars)])
     add_dbt_flags(table_samples_command_list, kwargs)
     ts_completed_process = subprocess.run(table_samples_command_list)
@@ -452,7 +457,7 @@ def slack(start_date, end_date, webhook_url, subtitle, re_data_target_dir, selec
     end_date = str(end_date.date())
     selected_alert_types = set(select)
 
-    if not webhook_url: # if webhook_url is via arguments, check the config file
+    if not webhook_url:  # if webhook_url is via arguments, check the config file
         config = read_re_data_config()
         validate_config_section(config, 'slack')
         slack_config = config.get('notifications').get('slack')
@@ -462,7 +467,7 @@ def slack(start_date, end_date, webhook_url, subtitle, re_data_target_dir, selec
     alerts_path = os.path.join(re_data_target_path, 'alerts.json')
     monitored_path = os.path.join(re_data_target_path, 'monitored.json')
     dbt_vars = parse_dbt_vars(kwargs.get('dbt_vars'))
-    
+
     args = {
         'start_date': start_date,
         'end_date': end_date,
@@ -486,7 +491,8 @@ def slack(start_date, end_date, webhook_url, subtitle, re_data_target_dir, selec
 
     slack_members = build_notification_identifiers_per_model(monitored_list=monitored, channel='slack')
 
-    alerts_per_model = prepare_exported_alerts_per_model(alerts=alerts, members_per_model=slack_members, selected_alert_types=selected_alert_types)
+    alerts_per_model = prepare_exported_alerts_per_model(alerts=alerts, members_per_model=slack_members,
+                                                         selected_alert_types=selected_alert_types)
     for model, details in alerts_per_model.items():
         owners = slack_members.get(model, [])
         slack_message = generate_slack_message(model, details, owners, subtitle, selected_alert_types)
@@ -494,6 +500,7 @@ def slack(start_date, end_date, webhook_url, subtitle, re_data_target_dir, selec
     print(
         f"Notification sent", chalk.green("SUCCESS")
     )
+
 
 @notify.command()
 @click.option(
@@ -549,14 +556,13 @@ def email(start_date, end_date, re_data_target_dir, select, **kwargs):
     alerts_path = os.path.join(re_data_target_path, 'alerts.json')
     monitored_path = os.path.join(re_data_target_path, 'monitored.json')
     dbt_vars = parse_dbt_vars(kwargs.get('dbt_vars'))
-    
+
     args = {
         'start_date': start_date,
         'end_date': end_date,
         'alerts_path': alerts_path,
         'monitored_path': monitored_path,
     }
-    
 
     command_list = ['dbt', 'run-operation', 'export_alerts', '--args', yaml.dump(args)]
     if dbt_vars: command_list.extend(['--vars', yaml.dump(dbt_vars)])
@@ -570,7 +576,8 @@ def email(start_date, end_date, re_data_target_dir, select, **kwargs):
         monitored = json.load(f)
 
     email_members = build_notification_identifiers_per_model(monitored_list=monitored, channel='email')
-    alerts_per_model = prepare_exported_alerts_per_model(alerts=alerts, members_per_model=email_members, selected_alert_types=selected_alert_types)
+    alerts_per_model = prepare_exported_alerts_per_model(alerts=alerts, members_per_model=email_members,
+                                                         selected_alert_types=selected_alert_types)
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     for model in alerts_per_model:
         owners = email_members.get(model, [])
@@ -592,7 +599,7 @@ def email(start_date, end_date, re_data_target_dir, select, **kwargs):
                 smtp_password=smtp_password,
                 use_ssl=use_ssl,
             )
-    
+
     print(
         f"Notification sent", chalk.green("SUCCESS")
     )

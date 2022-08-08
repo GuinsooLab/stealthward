@@ -15,11 +15,11 @@ def get_property(prop, project):
 
 
 setup(
-    name="ward",
-    version=get_property('__version__', ''),
+    name="stealthward",
+    version=get_property('__version__', 'ward'),
     author="ciusji",
     author_email="bqjimaster@gmail.com",
-    description="Stealthward - data quality framework",
+    description="Stealthward - data quality framework | powered by GuinsooLab",
     license="MIT",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -32,12 +32,11 @@ setup(
     ],
     install_requires=[
         "click>=8,<9",
-        "dbt-core>=1.0.0,<1.2.0",
+        "dbt-core>=1.0.0,<=1.2.0",
         "yachalk>=0.1.0,<0.2.0",
         "tabulate==0.8.9",
         "jsonschema==3.0.0",
         "analytics-python",
-        
     ],
     extras_require={"dev": ["isort", "black", "pre-commit"]},
     entry_points={

@@ -1,4 +1,3 @@
-
 import os
 import sys
 
@@ -15,6 +14,7 @@ def _supports_long_paths() -> bool:
     dll.RtlAreLongPathsEnabled.restype = c_bool
     return dll.RtlAreLongPathsEnabled()
 
+
 def _win_prepare_path(path: str) -> str:
     """Given a windows path, prepare it for use by making sure it is absolute
     and normalized.
@@ -26,11 +26,12 @@ def _win_prepare_path(path: str) -> str:
     if not path.startswith('\\\\') and path.startswith('\\'):
         curdrive = os.path.splitdrive(os.getcwd())[0]
         path = curdrive + path
-        
+
     if not os.path.splitdrive(path)[0]:
         path = os.path.join(os.getcwd(), path)
 
     return path
+
 
 def convert_path(path: str) -> str:
     """
@@ -52,7 +53,6 @@ def convert_path(path: str) -> str:
     if not path.startswith(prefix):
         path = prefix + path
     return path
-    
 
 
 def load_file_contents_as_string(path: str, strip: bool = True) -> str:
