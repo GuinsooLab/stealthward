@@ -19,6 +19,7 @@ const Sidebar: React.FC = (): ReactElement => (
                 transform md:relative md:translate-x-0 transition duration-200 ease-in-out  md:flex
                  md:flex-col md:justify-between max-h-screen overflow-y-auto"
     data-dev-hint="sidebar; px-0 for frameless; px-2 for visually inset the navigation"
+    style={{ paddingTop: 0, background: '#072C4F' }}
   >
     <div
       className="flex flex-col space-y-6"
@@ -30,7 +31,7 @@ const Sidebar: React.FC = (): ReactElement => (
         title="Your App is cool"
       >
         <span className="text-2xl font-extrabold whitespace-nowrap truncate">
-          <img src={Logo} alt="logo" width={60} style={{ padding: 7 }} />
+          <img src={Logo} alt="logo" width={60} style={{ padding: 3, height: 47 }} />
         </span>
       </a>
 
